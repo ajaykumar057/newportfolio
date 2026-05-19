@@ -55,21 +55,28 @@ function App() {
 
   // Initialize Lenis
   useEffect(() => {
+    const scrollContainer = document.getElementById('main-scroll-viewport');
+    if (!scrollContainer) return;
+
     const lenis = new Lenis({
+      wrapper: scrollContainer,
+      content: scrollContainer,
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
       wheelMultiplier: 0.9,
     });
 
+    let rafId;
     function raf(time) {
       lenis.raf(time);
-      requestAnimationFrame(raf);
+      rafId = requestAnimationFrame(raf);
     }
-    requestAnimationFrame(raf);
+    rafId = requestAnimationFrame(raf);
 
     return () => {
       lenis.destroy();
+      cancelAnimationFrame(rafId);
     };
   }, []);
 
@@ -369,7 +376,7 @@ function App() {
         />
 
         {/* Dynamic viewport scroll frame */}
-        <main className="flex-1 overflow-y-auto no-scrollbar relative flex flex-col pb-24" id="main-scroll-viewport">
+        <main className="flex-1 overflow-y-auto relative flex flex-col pb-24" id="main-scroll-viewport">
 
           {/* Top Navbar */}
           <Navbar
@@ -444,6 +451,23 @@ function App() {
                   </button>
                 </div>
               </motion.div>
+
+              {/* Bouncing Scroll Down Mouse Indicator */}
+              <div
+                onClick={() => {
+                  document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 cursor-pointer opacity-50 hover:opacity-100 transition-opacity hidden md:flex"
+              >
+                <span className="text-[9px] font-bold text-spotify-textMuted uppercase tracking-widest select-none">Scroll Down</span>
+                <motion.div
+                  animate={{ y: [0, 5, 0] }}
+                  transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                  className="text-spotify-green flex items-center justify-center w-6 h-10 border-2 border-spotify-textMuted/40 rounded-full relative"
+                >
+                  <span className="w-1.5 h-2.5 bg-spotify-green rounded-full absolute top-2 animate-bounce"></span>
+                </motion.div>
+              </div>
             </section>
 
             {/* ABOUT / STORYTELLING SECTION */}
